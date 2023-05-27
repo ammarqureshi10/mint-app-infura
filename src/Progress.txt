@@ -1,0 +1,17 @@
+IDEA:
+Basic NFT Mint App for:
+- Mint Page for ERC721 (Shop Dapp)
+- Mint Page for ERC1155 (NFT Ticket)
+
+
+1. Wallet connect 
+2. Blockchain data (ABI contracts)
+3. Basic Form for:
+   - NFT name, desc, image upload
+4. IPFS API for metamadata upload
+5. Trigger contract by passing hash
+ 
+
+Continue: 
+- Point 3 is almost done
+- Point 4 to be next
