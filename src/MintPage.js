@@ -68,8 +68,7 @@ export default function MintPage() {
         params: [{ chainId: "0x89" }] // mainnet
         // params: [{ chainId: web3.utils.toHex(chainId) }]
       });
-      let network = await web3.eth.getChainId();
-      setNetwork(network);
+      setNetwork(137);
     } catch (err) {
       console.log(err);
     }
