@@ -105,14 +105,15 @@ export default function MintPage() {
               // get total supply and add + 1 to mint new NFT
               const contract = new web3.eth.Contract(GenericABI, getContract());
               const totalSupply = await contract.methods.totalSupply().call();
-              let newTokenId = totalSupply + 1;
+              let newTokenId = Number(totalSupply) + 1;
               let fees = [];
-              let tokenUri = res.path;
+              // let tokenUri = res.path;
+              let tokenUri = `ipfs://${res.path}`;
               const mintTrx = await contract.methods
                 .mint(newTokenId, fees, tokenUri, account)
                 .send({
                   from: account,
-                  gasLimit: 200000
+                  gasLimit: 300000
                 });
               if (mintTrx.status) {
                 console.log("Minted Successfully: ", mintTrx.transactionHash);
