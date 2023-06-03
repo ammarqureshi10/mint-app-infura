@@ -15,9 +15,12 @@ import { GlobalContext } from "./GlobalContext";
 import Web3 from "web3";
 import { GenericABI } from "./ABI";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 export default function MintPage() {
   const { client, setAccount, account } = useContext(GlobalContext);
-
+  // const notify = () => toast("Wow so easy!");
   const [web3, setWeb3] = useState();
   // const [account, setAccount] = useState("");
   const [contract, setContract] = useState("");
@@ -91,7 +94,6 @@ export default function MintPage() {
           let metadata;
           // upload image
           const imageHash = await client.add(file);
-
           if (imageHash.path) {
             metadata = {
               name: name,
@@ -107,7 +109,6 @@ export default function MintPage() {
               const totalSupply = await contract.methods.totalSupply().call();
               let newTokenId = Number(totalSupply) + 1;
               let fees = [];
-              // let tokenUri = res.path;
               let tokenUri = `ipfs://${res.path}`;
               const mintTrx = await contract.methods
                 .mint(newTokenId, fees, tokenUri, account)
@@ -118,25 +119,32 @@ export default function MintPage() {
               if (mintTrx.status) {
                 console.log("Minted Successfully: ", mintTrx.transactionHash);
                 console.log("Minting end...");
+                toast.success(`NFT#${newTokenId} Minted in ${contract}`);
               } else {
                 console.log("Minting Failed:", mintTrx.transactionHash);
+                toast.error("Minting Failed!");
               }
             } else {
-              console.error("metadata upload unsuccess");
+              // console.error("metadata upload unsuccess");
+              toast.error("Metadata Upload Failed!");
             }
           } else {
-            console.error("Image upload unsuccess!");
+            // console.error("Image upload unsuccess!");
+            toast.error("Image Upload Failed!");
           }
         } else {
+          toast.warn("Switch To Polygon Network");
           await switchNetwork();
         }
       } catch (err) {
         e.preventDefault();
-        console.log("err: ", err);
+        // console.log("err: ", err);
+        toast.error(err.message);
       }
     } else {
       e.preventDefault();
-      alert("handleSubmit: Connect wallet and enter fields first!");
+      // alert("handleSubmit: Connect wallet and enter fields first!");
+      toast.warn("Connect wallet and enter fields first!");
     }
   }
 
@@ -147,7 +155,7 @@ export default function MintPage() {
   ];
 
   useEffect(() => {
-    if (window.ethereum) {
+    if (window.ethereum && account) {
       async function handleAccountChange() {
         try {
           await window.ethereum.on("accountsChanged", (accounts) => {
@@ -162,6 +170,7 @@ export default function MintPage() {
         try {
           await window.ethereum.on("chainChanged", (network) => {
             if (network != 137) {
+              console.log("network: ", network);
               switchNetwork();
             }
             // setNetwork(network);
@@ -175,7 +184,7 @@ export default function MintPage() {
       handleAccountChange();
       handleNetworkChange();
     } else {
-      console.log("web3 not found");
+      console.log("window.ethereum or account not found");
     }
   }, []);
 
@@ -186,6 +195,7 @@ export default function MintPage() {
         sx={{ marginRight: "15%", marginLeft: "15%" }}
         style={{ background: "azure" }}
       >
+        <ToastContainer />
         <Box sx={{ padding: 5 }}>
           <Typography variant="h3" gutterBottom sx={{ paddingBottom: 5 }}>
             MINT NFT
