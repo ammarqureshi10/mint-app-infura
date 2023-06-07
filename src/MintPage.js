@@ -186,7 +186,7 @@ export default function MintPage() {
     } else {
       console.log("window.ethereum or account not found");
     }
-  }, []);
+  }, [web3]);
 
   return (
     <React.Fragment>
