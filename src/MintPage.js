@@ -175,7 +175,7 @@ export default function MintPage() {
     } else {
       console.log("window.ethereum or account not found");
     }
-  }, []);
+  }, [web3]);
 
   function handleTokenAmount(e) {
     if(e.target.value <= 0){

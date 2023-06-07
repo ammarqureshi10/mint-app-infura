@@ -1,4 +1,4 @@
-const ERC1155contractAddress = "0x9657b9ee254f965Fa82F3C0B71841f0a5e8c8195";
+const ERC1155contractAddress = "0x34a061A1Fb042857aB1eb0176A604D293C63E340"; // mumbai matic
 const ERC1155ContractABI = [
 	{
 		"inputs": [],
