@@ -17,28 +17,25 @@ import { GenericABI } from "./ABI";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ERC1155ContractABI, ERC1155contractAddress } from "./ERC1155Contract";
 
 export default function MintPage() {
   const { client, setAccount, account } = useContext(GlobalContext);
   // const notify = () => toast("Wow so easy!");
   const [web3, setWeb3] = useState();
   // const [account, setAccount] = useState("");
-  const [contract, setContract] = useState("");
+  // const [contract, setContract] = useState("");
   const [file, setFile] = useState();
   const [network, setNetwork] = useState("");
+  const [tokenAmount, setTokenAmount] = useState(0);
+  // console.log("tokenAmount: ", tokenAmount);
 
   // NFT metadata
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   function getContract() {
-    if (contract === "Chainblock Calcio NFT") {
-      return "0x0aa4206457d74b6f7f7335a34bd26de57b0a3de6";
-    } else if (contract === "Chainblock ART V2") {
-      return "0x5c27e6e8316e805eaaaad402f683f329d0b65cdb";
-    } else if (contract === "Crypto Lovers") {
-      return "0xfacab39eAB8B2bA79849905F11266E9a6E8073fe";
-    }
+    return ERC1155contractAddress;
   }
 
   async function handleConnect() {
@@ -48,8 +45,8 @@ export default function MintPage() {
         await web3.givenProvider.enable();
         const accounts = await web3.eth.getAccounts();
         let network = await web3.eth.getChainId();
-        // if (network !== 80001) {
-        if (network != 137) {
+        if (network !== 80001) {
+        // if (network != 137) {
           await switchNetwork();
         }
         network = await web3.eth.getChainId();
@@ -67,19 +64,16 @@ export default function MintPage() {
     try {
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
-        // params: [{ chainId: "0x13881" }] // mumbai testnet
-        params: [{ chainId: "0x89" }] // mainnet
+        params: [{ chainId: "0x13881" }] // mumbai testnet
+        // params: [{ chainId: "0x89" }] // mainnet
         // params: [{ chainId: web3.utils.toHex(chainId) }]
       });
-      setNetwork(137);
+      // setNetwork(137);
+      setNetwork(80001);
     } catch (err) {
       console.log(err);
     }
   }
-
-  const handleContract = (event) => {
-    setContract(event.target.value);
-  };
 
   function handleFile(e) {
     setFile(e.target.files[0]);
@@ -89,7 +83,8 @@ export default function MintPage() {
     if (!!account && !!name && !!description && file) {
       try {
         e.preventDefault();
-        if (network == 137) {
+        // if (network == 137) {
+          if (network == 80001) {
           console.log("Minting start...");
           let metadata;
           // upload image
@@ -104,14 +99,13 @@ export default function MintPage() {
             const res = await client.add(JSON.stringify(metadata));
             if (res.path) {
               // CALL MINT FUNC HERE
-              // get total supply and add + 1 to mint new NFT
-              const contract = new web3.eth.Contract(GenericABI, getContract());
+              // get total supply and add + 1 to mint new ERC1155 token
+              const contract = new web3.eth.Contract(ERC1155ContractABI, getContract());
               const totalSupply = await contract.methods.totalSupply().call();
               let newTokenId = Number(totalSupply) + 1;
-              let fees = [];
-              let tokenUri = `ipfs://${res.path}`;
+              let tokenUri = `https://ipfs.io/ipfs/${res.path}`;
               const mintTrx = await contract.methods
-                .mint(newTokenId, fees, tokenUri, account)
+                .mint(newTokenId,tokenAmount, tokenUri)
                 .send({
                   from: account,
                   gasLimit: 300000
@@ -119,7 +113,7 @@ export default function MintPage() {
               if (mintTrx.status) {
                 console.log("Minted Successfully: ", mintTrx.transactionHash);
                 console.log("Minting end...");
-                toast.success(`NFT#${newTokenId} Minted in ${contract}`);
+                toast.success(`ERC1155 Token#${newTokenId} Minted in ${getContract()}`);
               } else {
                 console.log("Minting Failed:", mintTrx.transactionHash);
                 toast.error("Minting Failed!");
@@ -148,12 +142,6 @@ export default function MintPage() {
     }
   }
 
-  const categories = [
-    "Chainblock Calcio NFT",
-    "Chainblock ART V2",
-    "Crypto Lovers"
-  ];
-
   useEffect(() => {
     if (window.ethereum && account) {
       async function handleAccountChange() {
@@ -169,7 +157,8 @@ export default function MintPage() {
       async function handleNetworkChange() {
         try {
           await window.ethereum.on("chainChanged", (network) => {
-            if (network != 137) {
+            // if (network != 137) {
+              if (network != 80001) {
               console.log("network: ", network);
               switchNetwork();
             }
@@ -188,6 +177,15 @@ export default function MintPage() {
     }
   }, []);
 
+  function handleTokenAmount(e) {
+    if(e.target.value <= 0){
+    setTokenAmount(0);
+    } else {
+    setTokenAmount(e.target.value);
+    }
+    // console.log(e.target.value);
+  }
+
   return (
     <React.Fragment>
       <Paper
@@ -198,10 +196,10 @@ export default function MintPage() {
         <ToastContainer />
         <Box sx={{ padding: 5 }}>
           <Typography variant="h3" gutterBottom sx={{ paddingBottom: 5 }}>
-            MINT NFT
+            MINT ERC1155 Token
           </Typography>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={2}>
+            {/* <Grid item xs={12} sm={2}>
               <InputLabel
                 sx={{
                   display: "flex",
@@ -211,8 +209,8 @@ export default function MintPage() {
               >
                 Smart Contract
               </InputLabel>
-            </Grid>
-            <Grid item xs={12} sm={10}>
+            </Grid> */}
+            {/* <Grid item xs={12} sm={10}>
               <FormControl fullWidth size="small">
                 <InputLabel id="demo-simple-select-label">Contract</InputLabel>
                 <Select
@@ -227,7 +225,7 @@ export default function MintPage() {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
+            </Grid> */}
 
             <Grid item xs={12} sm={2}>
               <InputLabel
@@ -254,6 +252,31 @@ export default function MintPage() {
                 onChange={(e) => setName(e.target.value)}
               />
             </Grid>
+            {/* <Grid item xs={12} sm={2}>
+              <InputLabel
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  fontWeight: 700
+                }}
+              >
+                NFT Amount
+              </InputLabel>
+            </Grid>
+            <Grid item xs={12} sm={10}>
+              <TextField
+                required
+                id="amount"
+                name="amount"
+                label="NFT Amount..."
+                fullWidth
+                size="small"
+                autoComplete="off"
+                variant="outlined"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Grid> */}
             <Grid item xs={12} sm={2}>
               <InputLabel
                 sx={{
@@ -275,6 +298,29 @@ export default function MintPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <InputLabel
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  fontWeight: 700
+                }}
+              >
+                Token Amount
+              </InputLabel>
+            </Grid>
+            <Grid item xs={12} sm={9}>
+            <TextField
+          id="outlined-number"
+          label="Token Amount"
+          type="number"
+          value={tokenAmount}
+          onChange={handleTokenAmount}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
             </Grid>
             {/* <Grid item xs={12} sm={2}>
               <InputLabel
@@ -344,6 +390,9 @@ export default function MintPage() {
                 <input type="file" onChange={handleFile} />
               </Button>
             </Grid>
+            
+
+
 
             <Grid item xs={12} sm={6} />
             <Grid item xs={12} sm={5} />
