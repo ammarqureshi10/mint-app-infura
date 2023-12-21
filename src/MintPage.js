@@ -199,7 +199,7 @@ export default function MintPage() {
             MINT ERC1155 Token
           </Typography>
           <Grid container spacing={3}>
-            {/* <Grid item xs={12} sm={2}>
+            <Grid item xs={12} sm={2}>
               <InputLabel
                 sx={{
                   display: "flex",
@@ -209,8 +209,8 @@ export default function MintPage() {
               >
                 Smart Contract
               </InputLabel>
-            </Grid> */}
-            {/* <Grid item xs={12} sm={10}>
+            </Grid>
+            <Grid item xs={12} sm={10}>
               <FormControl fullWidth size="small">
                 <InputLabel id="demo-simple-select-label">Contract</InputLabel>
                 <Select
@@ -225,7 +225,7 @@ export default function MintPage() {
                   ))}
                 </Select>
               </FormControl>
-            </Grid> */}
+            </Grid>
 
             <Grid item xs={12} sm={2}>
               <InputLabel
