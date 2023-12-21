@@ -24,7 +24,7 @@ export default function MintPage() {
   // const notify = () => toast("Wow so easy!");
   const [web3, setWeb3] = useState();
   // const [account, setAccount] = useState("");
-  // const [contract, setContract] = useState("");
+  const [contract, setContract] = useState("");
   const [file, setFile] = useState();
   const [network, setNetwork] = useState("");
   const [tokenAmount, setTokenAmount] = useState(0);
@@ -78,6 +78,9 @@ export default function MintPage() {
   function handleFile(e) {
     setFile(e.target.files[0]);
   }
+  const handleContract = (event) => {
+    setContract(event.target.value);
+  };
 
   async function handleSubmit(e) {
     if (!!account && !!name && !!description && file) {
