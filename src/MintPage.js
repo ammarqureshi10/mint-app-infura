@@ -17,7 +17,7 @@ import { GenericABI } from "./ABI";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ERC1155ContractABI, ERC1155contractAddress } from "./ERC1155Contract";
+import { ticketContractABI, ticketContractAddress, christmasContractABI, christmasContractAddress } from "./ERC1155Contract";
 
 export default function MintPage() {
   const { client, setAccount, account } = useContext(GlobalContext);
@@ -25,6 +25,7 @@ export default function MintPage() {
   const [web3, setWeb3] = useState();
   // const [account, setAccount] = useState("");
   const [contract, setContract] = useState("");
+  console.log("contract", contract);
   const [file, setFile] = useState();
   const [network, setNetwork] = useState("");
   const [tokenAmount, setTokenAmount] = useState(0);
@@ -34,9 +35,9 @@ export default function MintPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  function getContract() {
-    return ERC1155contractAddress;
-  }
+  // function getContract() {
+  //   return ERC1155contractAddress;
+  // }
 
   async function handleConnect() {
     if (window.ethereum) {
@@ -46,7 +47,7 @@ export default function MintPage() {
         const accounts = await web3.eth.getAccounts();
         let network = await web3.eth.getChainId();
         if (network !== 80001) {
-        // if (network != 137) {
+          // if (network != 137) {
           await switchNetwork();
         }
         network = await web3.eth.getChainId();
@@ -84,62 +85,81 @@ export default function MintPage() {
 
   async function handleSubmit(e) {
     if (!!account && !!name && !!description && file) {
+      if (contract == categories[0]) {
+        if (network != 80001) {
+          alert("Switch to Polygon testnet");
+          return;
+        }
+      }
+      if (contract == categories[1]) {
+        if (network != 5) {
+          alert("Switch to Goerli testnet");
+          return;
+        }
+      }
       try {
-        e.preventDefault();
-        // if (network == 137) {
-          if (network == 80001) {
-          console.log("Minting start...");
-          let metadata;
-          // upload image
-          const imageHash = await client.add(file);
-          if (imageHash.path) {
-            metadata = {
-              name: name,
-              description: description,
-              image: `ipfs://${imageHash.path}`
-            };
-            // upload metadata
-            const res = await client.add(JSON.stringify(metadata));
-            if (res.path) {
-              // CALL MINT FUNC HERE
+        console.log("Minting start...");
+        let metadata;
+        let mintTrx;
+        let tokenUri;
+        let smartContract
+        // upload image
+        const imageHash = await client.add(file);
+        if (imageHash.path) {
+          metadata = {
+            name: name,
+            description: description,
+            image: `ipfs://${imageHash.path}`
+          };
+          // upload metadata
+          const res = await client.add(JSON.stringify(metadata));
+          if (res.path) {
+
+            if (contract == categories[0]) {
               // get total supply and add + 1 to mint new ERC1155 token
-              const contract = new web3.eth.Contract(ERC1155ContractABI, getContract());
-              const totalSupply = await contract.methods.totalSupply().call();
+              smartContract = new web3.eth.Contract(ticketContractABI, getContract());
+              const totalSupply = await smartContract.methods.totalSupply().call();
               let newTokenId = Number(totalSupply) + 1;
-              let tokenUri = `https://ipfs.io/ipfs/${res.path}`;
-              const mintTrx = await contract.methods
-                .mint(newTokenId,tokenAmount, tokenUri)
-                .send({
-                  from: account,
-                  gasLimit: 300000
-                });
-              if (mintTrx.status) {
-                console.log("Minted Successfully: ", mintTrx.transactionHash);
-                console.log("Minting end...");
-                toast.success(`ERC1155 Token#${newTokenId} Minted in ${getContract()}`);
-              } else {
-                console.log("Minting Failed:", mintTrx.transactionHash);
-                toast.error("Minting Failed!");
-              }
+              tokenUri = `https://ipfs.io/ipfs/${res.path}`;
+              mintTrx = await smartContract.methods.mint(newTokenId, tokenAmount, tokenUri).send({
+                from: account,
+                gasLimit: 300000
+              });
             } else {
-              // console.error("metadata upload unsuccess");
-              toast.error("Metadata Upload Failed!");
+              smartContract = new web3.eth.Contract(christmasContractABI, getContract());
+              mintTrx = await smartContract.methods.mint(tokenAmount, tokenUri, price).send({
+                from: account,
+                gasLimit: 300000
+              });
+            }
+
+            if (mintTrx.status) {
+              console.log("Minted Successfully: ", mintTrx.transactionHash);
+              console.log("Minting end...");
+              toast.success(`ERC1155 Token#${newTokenId} Minted in ${getContract()}`);
+            } else {
+              console.log("Minting Failed:", mintTrx.transactionHash);
+              toast.error("Minting Failed!");
             }
           } else {
-            // console.error("Image upload unsuccess!");
-            toast.error("Image Upload Failed!");
+            // console.error("metadata upload unsuccess");
+            toast.error("Metadata Upload Failed!");
           }
         } else {
-          toast.warn("Switch To Polygon Network");
-          await switchNetwork();
+          // console.error("Image upload unsuccess!");
+          toast.error("Image Upload Failed!");
         }
+        // } else {
+        //   toast.warn("Switch To Polygon Network");
+        //   await switchNetwork();
+        // }
       } catch (err) {
-        e.preventDefault();
+        // e.preventDefault();
         // console.log("err: ", err);
         toast.error(err.message);
       }
     } else {
-      e.preventDefault();
+      // e.preventDefault();
       // alert("handleSubmit: Connect wallet and enter fields first!");
       toast.warn("Connect wallet and enter fields first!");
     }
@@ -181,12 +201,24 @@ export default function MintPage() {
   }, [web3]);
 
   function handleTokenAmount(e) {
-    if(e.target.value <= 0){
-    setTokenAmount(0);
+    if (e.target.value <= 0) {
+      setTokenAmount(0);
     } else {
-    setTokenAmount(e.target.value);
+      setTokenAmount(e.target.value);
     }
     // console.log(e.target.value);
+  }
+
+  const categories = [
+    "Chainblock Event Ticket",
+    "Christmas Collection",
+  ];
+  function getContract() {
+    if (contract === "Chainblock Event Ticket") {
+      return ticketContractAddress;
+    } else {
+      return christmasContractAddress;
+    }
   }
 
   return (
@@ -314,16 +346,16 @@ export default function MintPage() {
               </InputLabel>
             </Grid>
             <Grid item xs={12} sm={9}>
-            <TextField
-          id="outlined-number"
-          label="Token Amount"
-          type="number"
-          value={tokenAmount}
-          onChange={handleTokenAmount}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
+              <TextField
+                id="outlined-number"
+                label="Token Amount"
+                type="number"
+                value={tokenAmount}
+                onChange={handleTokenAmount}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
             </Grid>
             {/* <Grid item xs={12} sm={2}>
               <InputLabel
@@ -393,7 +425,7 @@ export default function MintPage() {
                 <input type="file" onChange={handleFile} />
               </Button>
             </Grid>
-            
+
 
 
 
@@ -402,7 +434,7 @@ export default function MintPage() {
             <Grid item xs={12} sm={4}>
               {/* handleConnect */}
               {account ? (
-                <Button variant="contained" onClick={(e) => handleSubmit(e)}>
+                <Button variant="contained" onClick={() => handleSubmit()}>
                   Mint
                 </Button>
               ) : (
