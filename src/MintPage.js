@@ -158,12 +158,12 @@ export default function MintPage() {
         try {
           await window.ethereum.on("chainChanged", (network) => {
             // if (network != 137) {
-              if (network != 80001) {
-              console.log("network: ", network);
-              switchNetwork();
-            }
-            // setNetwork(network);
-            // console.log("new network: ", network);
+            //   if (network != 80001) {
+            //   console.log("network: ", network);
+            //   switchNetwork();
+            // }
+            setNetwork(network);
+            console.log("new network: ", network);
           });
         } catch (err) {
           console.log("handleNetworkChange err:", err);
