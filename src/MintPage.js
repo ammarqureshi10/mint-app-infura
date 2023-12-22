@@ -34,6 +34,7 @@ export default function MintPage() {
   // NFT metadata
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [price, setPrice] = useState(0);
 
   // function getContract() {
   //   return ERC1155contractAddress;
@@ -46,10 +47,10 @@ export default function MintPage() {
         await web3.givenProvider.enable();
         const accounts = await web3.eth.getAccounts();
         let network = await web3.eth.getChainId();
-        if (network !== 80001) {
-          // if (network != 137) {
-          await switchNetwork();
-        }
+        // if (network !== 80001) {
+        //   // if (network != 137) {
+        //   await switchNetwork();
+        // }
         network = await web3.eth.getChainId();
         setWeb3(web3);
         setAccount(accounts[0]);
@@ -61,20 +62,20 @@ export default function MintPage() {
       alert("Install Metamask");
     }
   }
-  async function switchNetwork() {
-    try {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x13881" }] // mumbai testnet
-        // params: [{ chainId: "0x89" }] // mainnet
-        // params: [{ chainId: web3.utils.toHex(chainId) }]
-      });
-      // setNetwork(137);
-      setNetwork(80001);
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  // async function switchNetwork() {
+  //   try {
+  //     await window.ethereum.request({
+  //       method: "wallet_switchEthereumChain",
+  //       params: [{ chainId: "0x13881" }] // mumbai testnet
+  //       // params: [{ chainId: "0x89" }] // mainnet
+  //       // params: [{ chainId: web3.utils.toHex(chainId) }]
+  //     });
+  //     // setNetwork(137);
+  //     setNetwork(80001);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
 
   function handleFile(e) {
     setFile(e.target.files[0]);
@@ -84,6 +85,8 @@ export default function MintPage() {
   };
 
   async function handleSubmit(e) {
+    console.log("network", network);
+    console.log("web3", web3);
     if (!!account && !!name && !!description && file) {
       if (contract == categories[0]) {
         if (network != 80001) {
@@ -127,7 +130,8 @@ export default function MintPage() {
               });
             } else {
               smartContract = new web3.eth.Contract(christmasContractABI, getContract());
-              mintTrx = await smartContract.methods.mint(tokenAmount, tokenUri, price).send({
+              let priceInWei = web3.utils.toWei(price, "ether");
+              mintTrx = await smartContract.methods.mint(tokenAmount, tokenUri, priceInWei).send({
                 from: account,
                 gasLimit: 300000
               });
@@ -136,31 +140,22 @@ export default function MintPage() {
             if (mintTrx.status) {
               console.log("Minted Successfully: ", mintTrx.transactionHash);
               console.log("Minting end...");
-              toast.success(`ERC1155 Token#${newTokenId} Minted in ${getContract()}`);
+              toast.success("Minted Successfully");
+              // toast.success(`ERC1155 Token#${newTokenId} Minted in ${getContract()}`);
             } else {
               console.log("Minting Failed:", mintTrx.transactionHash);
               toast.error("Minting Failed!");
             }
           } else {
-            // console.error("metadata upload unsuccess");
             toast.error("Metadata Upload Failed!");
           }
         } else {
-          // console.error("Image upload unsuccess!");
           toast.error("Image Upload Failed!");
         }
-        // } else {
-        //   toast.warn("Switch To Polygon Network");
-        //   await switchNetwork();
-        // }
       } catch (err) {
-        // e.preventDefault();
-        // console.log("err: ", err);
-        toast.error(err.message);
+        console.log(err);
       }
     } else {
-      // e.preventDefault();
-      // alert("handleSubmit: Connect wallet and enter fields first!");
       toast.warn("Connect wallet and enter fields first!");
     }
   }
@@ -219,6 +214,10 @@ export default function MintPage() {
     } else {
       return christmasContractAddress;
     }
+  }
+
+  function handlePrice(e) {
+    setPrice(e.target.value);
   }
 
   return (
@@ -357,6 +356,29 @@ export default function MintPage() {
                 }}
               />
             </Grid>
+            {contract == categories[1] ? <><Grid item xs={12} sm={2}>
+              <InputLabel
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  fontWeight: 700
+                }}
+              >
+                Price in ETH
+              </InputLabel>
+            </Grid>
+            <Grid item xs={12} sm={9}>
+              <TextField
+                id="outlined-number"
+                label="Price in ETH"
+                type="number"
+                value={price}
+                onChange={handlePrice}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Grid></> : null}
             {/* <Grid item xs={12} sm={2}>
               <InputLabel
                 sx={{
