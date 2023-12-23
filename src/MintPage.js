@@ -136,15 +136,15 @@ export default function MintPage() {
               });
             }
 
-            // if (mintTrx.status) {
-            //   console.log("Minted Successfully: ", mintTrx.transactionHash);
-            //   console.log("Minting end...");
-            //   toast.success("Minted Successfully");
-            //   // toast.success(`ERC1155 Token#${newTokenId} Minted in ${getContract()}`);
-            // } else {
-            //   console.log("Minting Failed:", mintTrx.transactionHash);
-            //   toast.error("Minting Failed!");
-            // }
+            if (mintTrx.status) {
+              console.log("Minted Successfully: ", mintTrx.transactionHash);
+              console.log("Minting end...");
+              toast.success("Minted Successfully");
+              // toast.success(`ERC1155 Token#${newTokenId} Minted in ${getContract()}`);
+            } else {
+              console.log("Minting Failed:", mintTrx.transactionHash);
+              toast.error("Minting Failed!");
+            }
           } else {
             toast.error("Metadata Upload Failed!");
           }
