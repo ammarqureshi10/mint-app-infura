@@ -28,7 +28,7 @@ export default function MintPage() {
   console.log("contract", contract);
   const [file, setFile] = useState();
   const [network, setNetwork] = useState("");
-  const [tokenAmount, setTokenAmount] = useState(0);
+  const [tokenAmount, setTokenAmount] = useState(1);
   // console.log("tokenAmount: ", tokenAmount);
 
   // NFT metadata
@@ -195,12 +195,11 @@ export default function MintPage() {
   }, [web3]);
 
   function handleTokenAmount(e) {
-    if (e.target.value <= 0) {
-      setTokenAmount(0);
-    } else {
+    // if (e.target.value <= 0) {
+    //   setTokenAmount(0);
+    // } else {
       setTokenAmount(e.target.value);
-    }
-    // console.log(e.target.value);
+    // }
   }
 
   const categories = [
@@ -340,7 +339,7 @@ export default function MintPage() {
                   fontWeight: 700
                 }}
               >
-                Token Amount
+                Total copies
               </InputLabel>
             </Grid>
             <Grid item xs={12} sm={9}>
