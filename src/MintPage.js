@@ -117,13 +117,12 @@ export default function MintPage() {
           // upload metadata
           const res = await client.add(JSON.stringify(metadata));
           if (res.path) {
-
+            tokenUri = `https://ipfs.io/ipfs/${res.path}`;
             if (contract == categories[0]) {
               // get total supply and add + 1 to mint new ERC1155 token
               smartContract = new web3.eth.Contract(ticketContractABI, getContract());
               const totalSupply = await smartContract.methods.totalSupply().call();
               let newTokenId = Number(totalSupply) + 1;
-              tokenUri = `https://ipfs.io/ipfs/${res.path}`;
               mintTrx = await smartContract.methods.mint(newTokenId, tokenAmount, tokenUri).send({
                 from: account,
                 gasLimit: 300000
@@ -137,15 +136,15 @@ export default function MintPage() {
               });
             }
 
-            if (mintTrx.status) {
-              console.log("Minted Successfully: ", mintTrx.transactionHash);
-              console.log("Minting end...");
-              toast.success("Minted Successfully");
-              // toast.success(`ERC1155 Token#${newTokenId} Minted in ${getContract()}`);
-            } else {
-              console.log("Minting Failed:", mintTrx.transactionHash);
-              toast.error("Minting Failed!");
-            }
+            // if (mintTrx.status) {
+            //   console.log("Minted Successfully: ", mintTrx.transactionHash);
+            //   console.log("Minting end...");
+            //   toast.success("Minted Successfully");
+            //   // toast.success(`ERC1155 Token#${newTokenId} Minted in ${getContract()}`);
+            // } else {
+            //   console.log("Minting Failed:", mintTrx.transactionHash);
+            //   toast.error("Minting Failed!");
+            // }
           } else {
             toast.error("Metadata Upload Failed!");
           }
@@ -367,18 +366,18 @@ export default function MintPage() {
                 Price in ETH
               </InputLabel>
             </Grid>
-            <Grid item xs={12} sm={9}>
-              <TextField
-                id="outlined-number"
-                label="Price in ETH"
-                type="number"
-                value={price}
-                onChange={handlePrice}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-            </Grid></> : null}
+              <Grid item xs={12} sm={9}>
+                <TextField
+                  id="outlined-number"
+                  label="Price in ETH"
+                  type="number"
+                  value={price}
+                  onChange={handlePrice}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </Grid></> : null}
             {/* <Grid item xs={12} sm={2}>
               <InputLabel
                 sx={{
